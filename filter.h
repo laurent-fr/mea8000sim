@@ -1,4 +1,5 @@
-
+#ifndef FILTER_H
+#define FILTER_H
 
 #define F_SAMPLE 8000. // Sample Frequency in Hertz
 
@@ -17,3 +18,5 @@ typedef struct {
 void filter_set(tfilter *filter , double f0, double bw );
 
 double filter_compute(tfilter *filter, double in);
+
+#endif

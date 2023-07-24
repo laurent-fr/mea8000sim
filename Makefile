@@ -1,10 +1,11 @@
 CC=gcc
-CFLAGS=-I.
-DEPS = 
-OBJ = main.o bin.o
+CFLAGS=-Wall
+LDFLAGS=-lm
+DEPS = bin.h filter.h
+OBJ = main.o bin.o filter.o synth.o
 
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 mea8000sim: $(OBJ)
-	$(CC) -o $@ $^ $(CFLAGS)
+	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS)
