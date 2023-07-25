@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-Wall
 LDFLAGS=-lm
-DEPS = bin.h filter.h
+DEPS = bin.h filter.h synth.h
 OBJ = main.o bin.o filter.o synth.o
 
 %.o: %.c $(DEPS)
