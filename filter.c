@@ -6,20 +6,19 @@
     #define M_PI 3.1415926535
 #endif 
 
-void filter_set(tfilter *filter , double f0, double bw ) {
+void filter_init(tfilter *filter) {
     
     filter->old = filter->older = filter->out =0;
-    filter->f0 = f0;
-    filter->bw = bw; 
-    filter->b = 2*cos(2*M_PI*f0/F_SAMPLE);
-    filter->c = exp(-2*M_PI*bw/F_SAMPLE);
-
+    
 }
 
 double filter_compute(tfilter *filter, double in) {
 
-    filter->out = filter->old * filter->c + filter->older * filter->b;
-    filter->out *= -filter->b;
+    filter->b = 2*cos(2*M_PI* filter->f0/F_SAMPLE);
+    filter->c = -exp(-1*M_PI* filter->bw/F_SAMPLE);
+
+    filter->out = in ;
+    filter->out -= filter->c * (filter->b * filter->old + filter->c * filter->older);
 
     filter->older = filter->old; 
     filter->old = filter->out ; 

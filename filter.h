@@ -15,7 +15,7 @@ typedef struct {
 } tfilter ;
 
 
-void filter_set(tfilter *filter , double f0, double bw );
+void filter_init(tfilter *filter);
 
 double filter_compute(tfilter *filter, double in);
 

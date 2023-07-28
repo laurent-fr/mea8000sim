@@ -112,3 +112,14 @@ void decode_frame(unsigned char *buffer,int pos,tframe *frame) {
 
 
 }
+
+void show_frame(tframe *frame) {
+
+    printf("ampl=%f, pi=%f, fd=%f , f1/bw1=%f/%f f2/bw2=%f/%f f3/bw3=%f/%f bw4=%f\n",
+        frame->ampl, frame->pi, frame->fd,
+        frame->fm1, frame->bw1,
+        frame->fm2, frame->bw2,
+        frame->fm3, frame->bw3,
+        frame->bw4);
+
+}

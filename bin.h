@@ -22,4 +22,6 @@ void find_sample(unsigned char *buffer,int sample_num,int *start,int *length);
 
 void decode_frame(unsigned char *buffer,int pos,tframe *frame);
 
+void show_frame(tframe *frame) ;
+
 #endif

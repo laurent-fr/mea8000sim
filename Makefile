@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-Wall
-LDFLAGS=-lm
+LDFLAGS=-lm -lsndfile
 DEPS = bin.h filter.h synth.h
 OBJ = main.o bin.o filter.o synth.o
 
