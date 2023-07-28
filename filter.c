@@ -1,6 +1,7 @@
 #include <math.h>
 
 #include "filter.h"
+#include "config.h"
 
 #ifndef M_PI
     #define M_PI 3.1415926535
@@ -14,8 +15,8 @@ void filter_init(tfilter *filter) {
 
 double filter_compute(tfilter *filter, double in) {
 
-    filter->b = 2*cos(2*M_PI* filter->f0/F_SAMPLE);
-    filter->c = -exp(-1*M_PI* filter->bw/F_SAMPLE);
+    filter->b = 2*cos(2*M_PI* filter->f0/SAMPLE_FREQUENCY);
+    filter->c = -exp(-1*M_PI* filter->bw/SAMPLE_FREQUENCY);
 
     filter->out = in ;
     filter->out -= filter->c * (filter->b * filter->old + filter->c * filter->older);

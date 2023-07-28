@@ -1,8 +1,6 @@
 #ifndef FILTER_H
 #define FILTER_H
 
-#define F_SAMPLE 8000. // Sample Frequency in Hertz
-
 typedef struct {
     double old;
     double older;

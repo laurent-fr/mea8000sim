@@ -1,3 +1,14 @@
+/**
+ * @file main.c
+ * @author your name (you@domain.com)
+ * @brief 
+ * @version 0.1
+ * @date 2023-07-28
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -6,19 +17,23 @@
 #include "bin.h"
 #include "synth.h"
 
-#define MAX_BIN_BUFFER 16000
+#include "config.h"
 
 unsigned char bin_buffer[MAX_BIN_BUFFER];
 int bin_buffer_length;
 int num_sample;
 
-#define MAX_OUT_BUFFER (1024*500)
+
 
 double out_buffer[MAX_OUT_BUFFER];
 int out_buffer_length = 0 ;
 
 void show_help() {
     printf("mea8000sim <binfile> <numsample>\n");
+}
+
+void debug_out(double value) {
+    printf("%f\n",value);
 }
 
 void add_to_out_buffer(double out) {
@@ -29,7 +44,7 @@ void save_wave(char *filename) {
     
     SF_INFO sfinfo ;
     sfinfo.channels = 1;
-    sfinfo.samplerate = 8000;
+    sfinfo.samplerate = SAMPLE_FREQUENCY;
     sfinfo.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
 
     SNDFILE *outfile = sf_open(filename, SFM_WRITE, &sfinfo);

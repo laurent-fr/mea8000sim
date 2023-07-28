@@ -38,7 +38,14 @@ double bw_table[] = {
     726, 309, 125, 50
 };
 
-
+/**
+ * @brief load a MEA8000 data file into memory buffer
+ * 
+ * @param filename input file name
+ * @param buffer output buffer
+ * @param max_size size limit
+ * @return int number of bytes read
+ */
 int read_bin(char *filename,unsigned char *buffer,int max_size) {
 
     FILE *fp;
@@ -64,19 +71,38 @@ int read_bin(char *filename,unsigned char *buffer,int max_size) {
     return n;
 }
 
+/**
+ * @brief find a sample in the buffer given its number
+ *        the format of the data is the following : 
+ *        - a table of 2 bytes data :
+ *            2 bytes = offset of sample from start of data
+ *            if data = FF FF -> end of table
+ *        - the samples, each with
+ *            4 bytes header :
+ *              2 bytes = sample length
+ *              1 byte = 00
+ *              1 byte = initial pitch 
+ *            a liste of 4 bytes frames 
+ * 
+ * @param buffer the input buffer
+ * @param sample_num the sample number (<128)
+ * @param start output the start position of the sample (points to "initial pitch" byte)
+ * @param length output the length of the sample (only the frames)
+ */
 void find_sample(unsigned char *buffer,int sample_num,int *start,int *length) {
 
     int sample_offset = buffer[sample_num*2]*256 + buffer[sample_num*2+1];
 
-    printf("sample_offset %d\n",sample_offset);
-
     *length = buffer[sample_offset]*256 + buffer[sample_offset+1] - 3;
-
     *start =  sample_offset + 3;
 }
 
 /**
- * @brief 
+ * @brief decode the 4 data bytes of a frame
+ *        - byte 1 = AABBCCDD , A=bw1, B=bw2, C=bw2, D=bw3
+ *        - byte 2 = EEEFFFFF , E=fm3, F=fm2
+ *        - byte 3 = GGGGGHHH , G=fm1 
+ *        - byte 4 = HIIJJJJJ , H(from bytes 3&4)=ampl, I=fd J=pi
  * 
  * @param buffer 
  * @param pos 
@@ -113,6 +139,11 @@ void decode_frame(unsigned char *buffer,int pos,tframe *frame) {
 
 }
 
+/**
+ * @brief 
+ * 
+ * @param frame 
+ */
 void show_frame(tframe *frame) {
 
     printf("ampl=%f, pi=%f, fd=%f , f1/bw1=%f/%f f2/bw2=%f/%f f3/bw3=%f/%f bw4=%f\n",

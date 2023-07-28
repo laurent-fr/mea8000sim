@@ -13,15 +13,14 @@ typedef struct synth_state {
 } tsynth_state ;
 
 
-double gen_sawtooth(double freq, double amp, double sample_freq, double *time);
+double gen_sawtooth(double freq);
 
-double gen_noise(double amp);
+double gen_noise();
 
 void init_state(tframe *frame, tsynth_state *state, double pitch);
 
 void play_sample(unsigned char *buffer, int start,int length ,  void (*do_play)(double)  );
 
-void play_frame(tframe *frame, tsynth_state *state, double sample_freq,double *time,
-  void (*do_play)(double)  );
+void play_frame(tframe *frame, tsynth_state *state,double *time, void (*do_play)(double)  );
 
 #endif

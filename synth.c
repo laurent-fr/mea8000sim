@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 #include "synth.h"
-
+#include "config.h"
 
 
 double interpolate(double value0,double value1,double time_now, double time_max);
@@ -14,37 +14,30 @@ double interpolate(double value0,double value1,double time_now, double time_max)
  * @brief generates a sawtooth waveform
  *       
  * @param freq frequency in hertz
- * @param amp amplitude
- * @param sample_freq sample frequency in hertz
- * @param time time in second
  * @return double generator output in [-1;1] range
  */
-double gen_sawtooth(double freq, double amp, double sample_freq, double *time) {
+double gen_sawtooth(double freq) {
 
     static double output=0;
 
-   /* double period=1/freq;
-    double num_period = floor(*time/period);
-    double start_of_period = period * num_period;
-    double position_in_period = (*time-start_of_period)/period; // 0<=position_in_period<=1
-    
-    return position_in_period * amp * 2 - 1; // -1<=out<=1*/
-
-    output += 2*freq/sample_freq;
+    output += 2*freq/SAMPLE_FREQUENCY;
 
     if (output>1) {
         output = -1;
     }
 
-    return output * amp;
+    return output;
 }
 
-double gen_noise(double amp) {
+/**
+ * @brief generate random noise
+ * 
+ * @return double generator output in [-1;1] range
+ */
+double gen_noise() {
 
-    // should be replaced by a white noise generator
-    return amp*(((double)rand()*2)/RAND_MAX - 1) ;
+    return ((double)rand()*2)/RAND_MAX - 1 ;
 }
-
 
 
 void init_state(tframe *frame, tsynth_state *state, double pitch) {
@@ -69,12 +62,19 @@ void show_state(tsynth_state *state) {
     printf("\n");
 }
 
-void debug_out(double value) {
-    printf("%f\n",value);
-}
-
+/**
+ * @brief play sample from data in buffer[start] to buffer [start+length]
+ *        call the do_play function each type a new data is generated 
+ *        (each 1/SAMPLE_FREQUENCY second)
+ * 
+ * @param buffer 
+ * @param start 
+ * @param length 
+ * @param do_play 
+ */
 void play_sample(unsigned char *buffer, int start,int length, void (*do_play)(double)  ) {
 
+    // first byte of sample is initial amplitude (half of the frequency in Hz)
     int initial_pitch = buffer[start]*2;
 
     tframe frame;
@@ -84,23 +84,20 @@ void play_sample(unsigned char *buffer, int start,int length, void (*do_play)(do
     init_state(&frame,&state,initial_pitch);
     
     for(int pos=start+1;pos<start+length;pos+=4) {
-
         decode_frame(buffer,pos,&frame) ;
-        play_frame(&frame, &state, 8000, &time, do_play );
+        play_frame(&frame, &state, &time, do_play );
 
     }
 
 }
 
-void play_frame(tframe *frame, tsynth_state *state, double sample_freq,double *time,
-  void (*do_play)(double) ) {
-
+void play_frame(tframe *frame, tsynth_state *state,double *time, void (*do_play)(double) ) {
 
     state->frame_time = 0 ;
 
     tsynth_state initial_state;
 
-    // copy the current state
+    // copy of the current state
     memcpy(&initial_state,state,sizeof(initial_state));
 
     show_state(state);
@@ -125,43 +122,45 @@ void play_frame(tframe *frame, tsynth_state *state, double sample_freq,double *t
         state->filter[2].bw = interpolate(initial_state.filter[2].bw,frame->bw3,state->frame_time,frame->fd);
         state->filter[3].bw = interpolate(initial_state.filter[3].bw,frame->bw4,state->frame_time,frame->fd);
 
-//printf("\t\tpitch=%f\n",state->pitch);
         // generator
         if (frame->pi==-16) {
-            out = gen_noise(state->amp);
+            out = gen_noise();
         } else {
-            out = gen_sawtooth(state->pitch,state->amp,sample_freq,time);
+            out = gen_sawtooth(state->pitch);
         }
+
+        //  amplificator
+        out *= state->amp;
 
         // filters
         for(int i=0;i<=3 ;i++) {
             out = filter_compute(&state->filter[i],out);
         }
 
-        if (frame->pi != -16) {
-            state->pitch+= frame->pi / (0.008 * sample_freq);
+        // adjust pitch
+        if (frame->pi != -16) { // -16 is noise
+            state->pitch+= frame->pi / (0.008 * SAMPLE_FREQUENCY); // frame->pi unit is Hz/8ms
         }
 
         // update time relative to frame
-        state->frame_time+= 1/sample_freq;
-
-       
+        state->frame_time+= 1.0/SAMPLE_FREQUENCY;
 
         // update global time
-        *time += 1/sample_freq;
+        *time += 1.0/SAMPLE_FREQUENCY;
 
+        // volume adjust
+        out*=VOLUME;
 
-        out*=0.5;
+        // clip output
+        if (out > 1.0) {
+            out = 1.0;
+        }
 
-    if (out > 1) {
-        out = 1;
-    }
+        if (out < -1.0) {
+            out = -1.0;
+        }
 
-    if (out < -1) {
-        out = -1;
-    }
-
-  // execute the callback function
+        // execute the callback function
         do_play(out);
 
     }
