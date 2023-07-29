@@ -103,8 +103,15 @@ void play_sample(unsigned char *buffer, int start,int length, void (*do_play)(do
     tframe frame;
     tsynth_state state;
 
+    // init synth state
     init_state(&frame,&state,initial_pitch);
+
+    // init filters state
+    for(int i=0;i<=3;i ++) {
+        filter_init(&state.filter[i]);
+    }
     
+    // decode & play each frame
     for(int pos=start+1;pos<start+length;pos+=4) {
         decode_frame(buffer,pos,&frame) ;
         play_frame(&frame, &state, do_play );
@@ -134,10 +141,7 @@ void play_frame(tframe *frame, tsynth_state *state, void (*do_play)(double) ) {
     //show_state(state);
     //show_frame(frame);
 
-    for(int i=0;i<=3;i ++) {
-        filter_init(&state->filter[i]);
-    }
-
+    // process frame
     while(state->frame_time < frame->fd) {
 
         double out;
