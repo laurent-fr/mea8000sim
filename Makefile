@@ -9,3 +9,7 @@ OBJ = main.o bin.o filter.o synth.o
 
 mea8000sim: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS)
+
+clean:
+	rm -f *.o 
+	rm -f mea8000sim 

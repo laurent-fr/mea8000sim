@@ -1,18 +1,27 @@
+/**
+ * @file bin.h
+ * @author Laurent FRANCOISE (@LaurentFr@piaille.fr)
+ * @brief 
+ * @version 0.1
+ * @date 2023-07-29
+ * 
+  * @copyright Copyright (c) 2023 Laurent FRANCOISE . All rights reserved. 
+ *            This project is released under the GNU Public License.* 
+ */
+
 #ifndef BIN_H
 #define BIN_H
 
+typedef struct {
+    double bw;
+    double f0;
+} tfilter_def;
 
 typedef struct {
-    double bw1;
-    double bw2;    
-    double bw3;
-    double bw4;
-    double fm3;
-    double fm2;
-    double fm1;
     double ampl; 
     double  fd; 
     double pi; 
+    tfilter_def filter[4];
 
 } tframe;
 
