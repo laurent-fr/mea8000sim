@@ -131,7 +131,7 @@ void find_sample(unsigned char *buffer,int sample_num,int *start,int *length) {
 
 /**
  * @brief decode the 4 data bytes of a frame
- *        - byte 1 = AABBCCDD , A=bw1, B=bw2, C=bw2, D=bw3
+ *        - byte 1 = AABBCCDD , A=bw1, B=bw2, C=bw3, D=bw4
  *        - byte 2 = EEEFFFFF , E=fm3, F=fm2
  *        - byte 3 = GGGGGHHH , G=fm1 
  *        - byte 4 = HIIJJJJJ , H(from bytes 3&4)=ampl, I=fd J=pi
