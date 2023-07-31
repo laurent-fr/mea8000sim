@@ -29,9 +29,9 @@ double gen_sawtooth(double freq);
 
 double gen_noise();
 
-void init_state(tframe *frame, tsynth_state *state, double pitch);
+void init_state(unsigned char *buffer, int start, tsynth_state *state);
 
-void play_sample(unsigned char *buffer, int start,int length ,  void (*do_play)(double) );
+void play_sample(unsigned char *buffer, int start,int length, tsynth_state *state, void (*do_play)(double) );
 
 void play_frame(tframe *frame, tsynth_state *state, void (*do_play)(double) );
 

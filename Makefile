@@ -1,8 +1,8 @@
 CC=gcc
 CFLAGS=-Wall
 LDFLAGS=-lm -lsndfile
-DEPS = bin.h filter.h synth.h config.h
-OBJ = main.o bin.o filter.o synth.o
+DEPS = bin.h filter.h synth.h speak.h config.h
+OBJ = main.o bin.o filter.o synth.o speak.o
 
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)

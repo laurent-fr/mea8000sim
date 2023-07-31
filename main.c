@@ -15,10 +15,11 @@
 
 #include <sndfile.h>
 
+#include "config.h"
+
 #include "bin.h"
 #include "synth.h"
-
-#include "config.h"
+#include "speak.h"
 
 unsigned char bin_buffer[MAX_BIN_BUFFER];
 int bin_buffer_length;
@@ -80,6 +81,8 @@ void save_wave(char *filename) {
     printf("Output file %s written.\n", filename);
 }
 
+
+
 /**
  * @brief the main function
  * 
@@ -102,6 +105,10 @@ int main(int argc, char *argv[]) {
     printf("File %s, read %d bytes.\n",
         filename, bin_buffer_length);
 
+
+    // show_help_speak();
+    // speak(bin_buffer,"bOjwr.lE.mOd....jE.sui.I.pRogRam.dE.SIt&z.vokal..av&k.un.vW.dE.Robo.",add_to_out_buffer);
+   
     int sample_start;
     int sample_length;
     find_sample(bin_buffer,num_sample,&sample_start,&sample_length);
@@ -109,7 +116,10 @@ int main(int argc, char *argv[]) {
     printf("Sample %d : start offset %d, length %d.\n",
         num_sample,sample_start,sample_length);
 
-    play_sample(bin_buffer,sample_start,sample_length,add_to_out_buffer);
+    tsynth_state state;
+    init_state(bin_buffer,sample_start,&state);
+
+    play_sample(bin_buffer,sample_start,sample_length,&state,add_to_out_buffer);
 
     save_wave(output_filename);
 

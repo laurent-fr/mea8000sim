@@ -55,17 +55,26 @@ double gen_noise() {
 
 /**
  * @brief init the synth state from initial pitch and data of first frame
+ *        starting at buffer[start]
  * 
- * @param frame a pointer to the first frame of data
- * @param state a pointer to the synth state
- * @param pitch the initial pitch
+ * @param buffer a pointer to the data buffer
+ * @param start the offset to the start of speach data
+ * @param state a pointer to the synth stata
  */
-void init_state(tframe *frame, tsynth_state *state, double pitch) {
-    state->pitch = pitch;
+void init_state(unsigned char *buffer, int start, tsynth_state *state) {
+
+    // first byte of sample is initial amplitude (half of the frequency in Hz)
+    int initial_pitch = buffer[start]*2;
+    
+    tframe frame;
+    decode_frame(buffer,start+1,&frame) ;
+printf("ee");
+    state->pitch = initial_pitch;
     state->amp = 0 ;
     for(int i=0;i<=3; i++) {
-        state->filter[i].bw = frame->filter[i].bw;
-        state->filter[i].f0 = frame->filter[i].f0;
+        state->filter[i].bw = frame.filter[i].bw;
+        state->filter[i].f0 = frame.filter[i].f0;
+        filter_init(&state->filter[i]);
     }
 
 }
@@ -92,29 +101,18 @@ void show_state(tsynth_state *state) {
  * @param buffer the input buffer
  * @param start start offset of the sample
  * @param length length of the sample
+ * @param state a pointer to the synth state
  * @param do_play a pointer to a function executed each time new data is generated
  *                ( SAMPLE_FREQUENCY times per second )
  */
-void play_sample(unsigned char *buffer, int start,int length, void (*do_play)(double)  ) {
-
-    // first byte of sample is initial amplitude (half of the frequency in Hz)
-    int initial_pitch = buffer[start]*2;
+void play_sample(unsigned char *buffer, int start,int length, tsynth_state *state, void (*do_play)(double) ) {
 
     tframe frame;
-    tsynth_state state;
 
-    // init synth state
-    init_state(&frame,&state,initial_pitch);
-
-    // init filters state
-    for(int i=0;i<=3;i ++) {
-        filter_init(&state.filter[i]);
-    }
-    
     // decode & play each frame
     for(int pos=start+1;pos<start+length;pos+=4) {
         decode_frame(buffer,pos,&frame) ;
-        play_frame(&frame, &state, do_play );
+        play_frame(&frame, state, do_play );
 
     }
 
