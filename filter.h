@@ -2,7 +2,7 @@
  * @file filter.h
  * @author Laurent FRANCOISE (@LaurentFr@piaille.fr)
  * @brief 
- * @version 0.1
+ * @version 0.2
  * @date 2023-07-29
  * 
  * @copyright Copyright (c) 2023 Laurent FRANCOISE . All rights reserved. 
