@@ -63,13 +63,11 @@ double gen_noise() {
  */
 void init_state(unsigned char *buffer, int start, tsynth_state *state) {
 
-    // first byte of sample is initial amplitude (half of the frequency in Hz)
-    int initial_pitch = buffer[start]*2;
+    set_pitch(buffer,start,state);
     
     tframe frame;
     decode_frame(buffer,start+1,&frame) ;
-printf("ee");
-    state->pitch = initial_pitch;
+
     state->amp = 0 ;
     for(int i=0;i<=3; i++) {
         state->filter[i].bw = frame.filter[i].bw;
@@ -77,6 +75,19 @@ printf("ee");
         filter_init(&state->filter[i]);
     }
 
+}
+
+/**
+ * @brief Set the absolute pitch in synth state
+ * 
+ * @param buffer a pointer to the data buffer
+ * @param start the offset to the start of speach data
+ * @param state a pointer to the synth stata
+ */
+void set_pitch(unsigned char *buffer, int start, tsynth_state *state) {
+    // first byte of sample is initial amplitude (half of the frequency in Hz)
+    int initial_pitch = buffer[start]*2;
+    state->pitch = initial_pitch;
 }
 
 /**

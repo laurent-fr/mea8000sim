@@ -12,6 +12,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include <sndfile.h>
 
@@ -23,9 +24,6 @@
 
 unsigned char bin_buffer[MAX_BIN_BUFFER];
 int bin_buffer_length;
-int num_sample;
-
-
 
 double out_buffer[MAX_OUT_BUFFER];
 int out_buffer_length = 0 ;
@@ -35,7 +33,14 @@ int out_buffer_length = 0 ;
  * 
  */
 void show_help() {
-    printf("mea8000sim <binfile> <numsample> <output_wav_file>\n");
+    printf("mea8000sim is a speech synthesis program.\n");
+    printf("\t -b <binfile>\n");
+    printf("\t -n <numsample>\n");
+    printf("\t -o <output_wav_file>\n");
+    printf("\t -s <string to speech>\n");
+    printf("\t -h general help\n");
+    printf("\t -H speak module help\n");
+
 }
 
 /**
@@ -89,38 +94,95 @@ void save_wave(char *filename) {
  */
 int main(int argc, char *argv[]) {
 
-    // show help ?
-    if (argc!=4) {
+    if (argc==1) {
         show_help();
         exit(0);
     }
 
     // command line parameters
-    char *filename=argv[1];
-    sscanf(argv[2],"%d",&num_sample);
-    char *output_filename=argv[3];
+    char *bin_filename = NULL;
+    char *say = NULL;
+    int num_sample = -1;
+    char *output_filename = NULL;
+    
+    int c;
+    while (( c = getopt (argc, argv, "b:o:n:s:hH")) != -1) {
+        switch(c) {
+            case 'b':
+                bin_filename = optarg;
+                break;
+            case 'o':
+                output_filename = optarg;
+                break;
+            case 'n':
+                sscanf(optarg,"%d",&num_sample);
+                break;
+            case 's':
+                say = optarg;
+                break;
+            case 'h':
+                show_help();
+                exit(0);
+            case 'H':
+                show_help_speak();
+                exit(0);
 
-    bin_buffer_length = read_bin(filename,bin_buffer,MAX_BIN_BUFFER);
+        }
+    }
 
-    printf("File %s, read %d bytes.\n",
-        filename, bin_buffer_length);
+    // check input parameters
+    if (bin_filename==NULL) {
+        fprintf(stderr,"Error: -b option is required.\n\n");
+        show_help();
+        exit(-1);
+    }
+
+    if (output_filename==NULL) {
+        fprintf(stderr,"Error: -o option is required.\n\n");
+        show_help();
+        exit(-1);
+    }
+
+    if ((num_sample==-1) && (say==NULL)) {
+        fprintf(stderr,"Error: one of -n or -s option is required.\n\n");
+        show_help();
+        exit(-1);
+    }
 
 
-    // show_help_speak();
-    // speak(bin_buffer,"bOjwr.lE.mOd....jE.sui.I.pRogRam.dE.SIt&z.vokal..av&k.un.vW.dE.Robo.",add_to_out_buffer);
-   
-    int sample_start;
-    int sample_length;
-    find_sample(bin_buffer,num_sample,&sample_start,&sample_length);
+    if ((num_sample!=-1) && (say!=NULL)) {
+        fprintf(stderr,"Error: -n and -s options are mutually exclusives.\n\n");
+        show_help();
+        exit(-1);
+    }
 
-    printf("Sample %d : start offset %d, length %d.\n",
-        num_sample,sample_start,sample_length);
 
-    tsynth_state state;
-    init_state(bin_buffer,sample_start,&state);
+    // load data file
+    bin_buffer_length = read_bin(bin_filename,bin_buffer,MAX_BIN_BUFFER);
 
-    play_sample(bin_buffer,sample_start,sample_length,&state,add_to_out_buffer);
+    printf("Data file %s, read %d bytes.\n",
+        bin_filename, bin_buffer_length);
 
+
+    if (num_sample==-1) {
+        // speak(bin_buffer,"bOjwr.lE.mOd....jE.sui.I.pRogRam.dE.SIt&z.vokal..av&k.un.vW.dE.Robo.",add_to_out_buffer);
+        speak(bin_buffer,say,add_to_out_buffer);
+    } else {
+
+        int sample_start;
+        int sample_length;
+        find_sample(bin_buffer,num_sample,&sample_start,&sample_length);
+
+        printf("Sample %d : start offset %d, length %d.\n",
+            num_sample,sample_start,sample_length);
+
+        tsynth_state state;
+        init_state(bin_buffer,sample_start,&state);
+
+        play_sample(bin_buffer,sample_start,sample_length,&state,add_to_out_buffer);
+    }
+
+    // save the file
     save_wave(output_filename);
 
     return 0;

@@ -31,6 +31,8 @@ double gen_noise();
 
 void init_state(unsigned char *buffer, int start, tsynth_state *state);
 
+void set_pitch(unsigned char *buffer, int start, tsynth_state *state);
+
 void play_sample(unsigned char *buffer, int start,int length, tsynth_state *state, void (*do_play)(double) );
 
 void play_frame(tframe *frame, tsynth_state *state, void (*do_play)(double) );
